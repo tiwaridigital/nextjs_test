@@ -22,20 +22,30 @@ const SanityData = () => {
 
   const allChapters = async () => {
     console.log('allChapters called')
-    const query = '*[_type == "chapters"] | order(_createdAt desc)[0..11]'
+    const id = 'hcPd9DU4IcfM8v35xUiiAM'
+    const query = `*[_type == "chapters" && url._ref == "${id}"]`
     const result = await sanityClient.fetch(query)
     console.log('chapters', result)
-    // const query = '*[_type == "chapters" && _id == "yOOeEOatiAHhlMRDlAPNqn"]'
-    // const result = await sanityClient.fetch(query)
-    // console.log('chapters', result)
+
     result.forEach(async (x) => {
       const res = await sanityClient
         .patch(x._id)
         .set({
-          hasNextEp: true,
+          url: {
+            _ref: id,
+            _type: 'reference',
+            _weak: true,
+          },
         })
         .commit()
       console.log('res', res)
+    })
+
+    //delete chapters
+    result.forEach(async (x) => {
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      const result = await sanityClient.delete(x._id)
+      console.log('deleted', result)
     })
   }
 
